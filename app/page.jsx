@@ -10,6 +10,8 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [isDragOverFollowing, setIsDragOverFollowing] = useState(false);
+  const [isDragOverFollowers, setIsDragOverFollowers] = useState(false);
   const modalRef = useRef(null);
   const videoModalRef = useRef(null);
 
@@ -37,6 +39,25 @@ export default function Home() {
 
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
+    if (!file) return;
+
+    if (type === 'following' && file.name !== 'following.json') {
+      alert('Please upload the correct file: following.json');
+      return;
+    } else if (type === 'followers' && file.name !== 'followers_1.json') {
+      alert('Please upload the correct file: followers_1.json');
+      return;
+    }
+
+    type === 'following' ? setFollowingFile(file) : setFollowersFile(file);
+  };
+
+  const handleDrop = (e, type) => {
+    e.preventDefault();
+    if (type === 'following') setIsDragOverFollowing(false);
+    if (type === 'followers') setIsDragOverFollowers(false);
+    
+    const file = e.dataTransfer.files[0];
     if (!file) return;
 
     if (type === 'following' && file.name !== 'following.json') {
@@ -120,7 +141,7 @@ export default function Home() {
         Unfollowers Checker
       </motion.h1>
 
-      {/* How To Section - Changed to explanation card with button */}
+      {/* How To Section */}
       <motion.div
         className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border-2 border-gray-300 p-6 mb-10"
         initial={{ scale: 0.9, opacity: 0 }}
@@ -131,9 +152,17 @@ export default function Home() {
           Getting Started
         </h2>
         <div className="text-lg text-gray-700 mb-6 px-4">
-          <p className="mb-3">This tool helps you find accounts you follow on Instagram that don't follow you back. To use it, you'll need to download your following and followers data from Instagram.</p>
-          <p className="mb-3">The files needed are <span className="font-semibold text-blue-600">following.json</span> and <span className="font-semibold text-blue-600">followers_1.json</span> from your Instagram data download.</p>
-          <p>Once you have these files, upload them below and click submit to see who doesn't follow you back.</p>
+          <p className="mb-3">
+            This tool helps you find accounts you follow on Instagram that don't follow you back. 
+            To use it, you'll need to download your following and followers data from Instagram.
+          </p>
+          <p className="mb-3">
+            The files needed are <span className="font-semibold text-blue-600">following.json</span> and{" "}
+            <span className="font-semibold text-blue-600">followers_1.json</span> from your Instagram data download.
+          </p>
+          <p>
+            Once you have these files, upload them below and click submit to see who doesn't follow you back.
+          </p>
         </div>
         <div className="flex justify-center">
           <motion.button
@@ -158,19 +187,22 @@ export default function Home() {
         animate="visible"
         variants={{
           hidden: {},
-          visible: {
-            transition: { staggerChildren: 0.2 },
-          },
+          visible: { transition: { staggerChildren: 0.2 } },
         }}
       >
         {/* Upload for following.json */}
         <motion.div
-          className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center border-2 border-gray-300 hover:border-blue-300 transition-all relative"
-          whileHover={{ scale: 1.03 }}
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0 },
+          animate={{ scale: isDragOverFollowing ? 1.03 : 1 }}
+          className={`bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center border-2 transition-all relative ${
+            isDragOverFollowing ? 'border-blue-300' : 'border-gray-300 hover:border-blue-300'
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragOverFollowing(true);
           }}
+          onDragLeave={() => setIsDragOverFollowing(false)}
+          onDrop={(e) => handleDrop(e, 'following')}
+          whileHover={{ scale: 1.03 }}
         >
           <p className="text-2xl font-semibold mb-4">
             Upload <span className="text-blue-500">following.json</span>
@@ -202,12 +234,17 @@ export default function Home() {
 
         {/* Upload for followers_1.json */}
         <motion.div
-          className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center border-2 border-gray-300 hover:border-blue-300 transition-all relative"
-          whileHover={{ scale: 1.03 }}
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: { opacity: 1, y: 0 },
+          animate={{ scale: isDragOverFollowers ? 1.03 : 1 }}
+          className={`bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center border-2 transition-all relative ${
+            isDragOverFollowers ? 'border-blue-300' : 'border-gray-300 hover:border-blue-300'
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragOverFollowers(true);
           }}
+          onDragLeave={() => setIsDragOverFollowers(false)}
+          onDrop={(e) => handleDrop(e, 'followers')}
+          whileHover={{ scale: 1.03 }}
         >
           <p className="text-2xl font-semibold mb-4">
             Upload <span className="text-blue-500">followers_1.json</span>
@@ -316,7 +353,7 @@ export default function Home() {
                   <ol className="list-decimal pl-5 text-gray-700 space-y-2">
                     <li>Go to Instagram Settings → Privacy and Security → Data Download</li>
                     <li>Request data download in JSON format</li>
-                    <li>Wait untill its downloaded (the time it takes range between couple of minutes to hours)</li>
+                    <li>Wait until it's downloaded (the time it takes range between couple of minutes to hours)</li>
                     <li>Download and extract the ZIP file</li>
                     <li>Find <span className="font-mono text-blue-600">following.json</span> and <span className="font-mono text-blue-600">followers_1.json</span> files</li>
                   </ol>
@@ -356,7 +393,7 @@ export default function Home() {
             >
               {/* Modal Header */}
               <div className="bg-gradient-to-r from-purple-500 to-indigo-600 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">Results Found: {output.count}</h2>
+                <h2 className="text-2xl font-bold text-white">Number Of Unfollowers: {output.count}</h2>
                 <button
                   onClick={() => setShowModal(false)}
                   className="text-white hover:text-gray-200 focus:outline-none"
@@ -398,17 +435,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              
-              {/* Modal Footer */}
-              <div className="border-t border-gray-200 px-6 py-3 bg-gray-50 flex justify-between">
-                <p className="text-sm text-gray-500">Results retrieved at: {new Date().toLocaleTimeString()}</p>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition shadow-sm text-sm font-medium"
-                >
-                  Close Window
-                </button>
-              </div>
+            
             </motion.div>
           </motion.div>
         )}
