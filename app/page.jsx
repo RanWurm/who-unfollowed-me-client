@@ -372,7 +372,7 @@ export default function Home() {
                 <div className="mb-4 flex items-center">
                   <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
                   <p className="text-gray-700 text-lg">
-                    Found <span className="font-bold text-purple-600">{output.count}</span> unique references
+                    Found <span className="font-bold text-purple-600">{output.count}</span> People that dont follow you back
                   </p>
                 </div>
                 
